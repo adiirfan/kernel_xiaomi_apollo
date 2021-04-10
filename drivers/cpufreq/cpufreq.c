@@ -502,6 +502,18 @@ void cpufreq_disable_fast_switch(struct cpufreq_policy *policy)
 }
 EXPORT_SYMBOL_GPL(cpufreq_disable_fast_switch);
 
+static int batterysaver_max_freqs[BATTERY_SAVER_MAX_LEVEL][8] = {
+	// little x 4 , big x 3, prime x 1 - clusters
+	// saver 1
+	{ LVL1_LITTLE,LVL1_LITTLE,LVL1_LITTLE,LVL1_LITTLE,
+	LVL1_BIG,LVL1_BIG,LVL1_BIG,
+	LVL1_PRIME },
+};
+
+static int get_cpu_max_for_core(unsigned int cpu, int batterysaverlevel) {
+	return batterysaver_max_freqs[batterysaverlevel][cpu];
+}
+
 /**
  * cpufreq_driver_resolve_freq - Map a target frequency to a driver-supported
  * one.
@@ -515,10 +527,9 @@ EXPORT_SYMBOL_GPL(cpufreq_disable_fast_switch);
 unsigned int cpufreq_driver_resolve_freq(struct cpufreq_policy *policy,
 					 unsigned int target_freq)
 {
-	
 	unsigned int cpu = policy->cpu;
 	int max = 0;
-	max = get_cpu_max_for_core(cpu, batterysaver_level);
+	max = get_cpu_max_for_core(cpu, 0);
 	if (max<=0) max = policy->max;
 	target_freq = clamp_val(target_freq, policy->min, max);
 	
@@ -565,18 +576,6 @@ unsigned int cpufreq_policy_transition_delay_us(struct cpufreq_policy *policy)
 	return LATENCY_MULTIPLIER;
 }
 EXPORT_SYMBOL_GPL(cpufreq_policy_transition_delay_us);
-
-static int batterysaver_max_freqs[BATTERY_SAVER_MAX_LEVEL][8] = {
-	// little x 4 , big x 3, prime x 1 - clusters
-	// saver 1
-	{ LVL1_LITTLE,LVL1_LITTLE,LVL1_LITTLE,LVL1_LITTLE,
-	LVL1_BIG,LVL1_BIG,LVL1_BIG,
-	LVL1_PRIME },
-};
-
-static int get_cpu_max_for_core(unsigned int cpu, int batterysaverlevel) {
-	return batterysaver_max_freqs[batterysaverlevel][cpu];
-}
 
 /*********************************************************************
  *                          SYSFS INTERFACE                          *
