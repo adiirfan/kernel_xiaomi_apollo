@@ -571,7 +571,7 @@ static int batterysaver_max_freqs[BATTERY_SAVER_MAX_LEVEL][8] = {
 };
 
 static int get_cpu_max_for_core(unsigned int cpu, int batterysaverlevel) {
-	return batterysaver_max_freqs[0][cpu];
+	return batterysaver_max_freqs[batterysaverlevel][cpu];
 }
 
 /*********************************************************************
@@ -734,7 +734,7 @@ static ssize_t show_scaling_cur_freq(struct cpufreq_policy *policy, char *buf)
 static int skip_or_tune_min_freq(struct cpufreq_policy *cur_policy, struct cpufreq_policy *new_policy) {
 	unsigned int cpu = cur_policy->cpu;
 	int saver_max = 0;
-	saver_max = get_cpu_max_for_core(cpu,batterysaver_level);
+	saver_max = get_cpu_max_for_core(cpu, 0);
 	pr_info("%s MIN freq tuning: required min freq: %d - setting saver max freq: %d\n",__func__,new_policy->min, saver_max);
 	if (saver_max>=0 && saver_max < new_policy->min) {
 			// if battery saver max freq is BELOW the new min (freq boosting supposedly) cut back to saver maximum...
@@ -2323,7 +2323,7 @@ static int cpufreq_set_policy(struct cpufreq_policy *policy,
 	int max = 0;
 	pr_debug("%s [cleanslate_policy] new min and max freqs are %u - %u kHz\n",__func__,
 			 policy->min, policy->max);
-	max = get_cpu_max_for_core(cpu,batterysaver_level);
+	max = get_cpu_max_for_core(cpu, 0);
 	if (policy->min>max) {
 		pr_debug("%s [cleanslate_policy] freq for core: %u saver_level %d  cpu: %d  target MIN: %u",__func__,max,batterysaver_level,cpu,policy->min);
 		policy->min = max;
