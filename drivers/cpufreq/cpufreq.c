@@ -39,6 +39,8 @@
 #define LVL1_BIG    2054400
 #define LVL1_PRIME  2457600
 
+#define BATTERY_SAVER_MAX_LEVEL 1
+
 static LIST_HEAD(cpufreq_policy_list);
 
 static inline bool policy_is_inactive(struct cpufreq_policy *policy)
